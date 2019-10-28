@@ -127,5 +127,12 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-
 AUTH_USER_MODEL = "users.User"
+
+
+# 파일 업로드 경로 절대 경로를 넣어야함
+MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
+
+# MEDIA_ROOT에 URL로 접근하기 위한 설정 media/ 로하면 상대경로 , /media/로 하면 절대경로
+MEDIA_URL = "/media/"

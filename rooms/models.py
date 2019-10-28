@@ -79,12 +79,27 @@ class Room(core_models.AbstractTimeStampModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        self.city = str.capitalize(self.city)
+        super().save(*args, **kwargs)
+
+    def total_rating(self):
+        all_reviews = self.reviews.all()
+        all_ratings = 0
+        for review in all_reviews:
+            all_ratings += review.rating_average()
+
+        if all_reviews.count() > 0:
+            return all_ratings / all_reviews.count()
+        else:
+            return 0
+
 
 class Photo(core_models.AbstractTimeStampModel):
     """방 사진"""
 
     caption = models.CharField(max_length=80)
-    file = models.ImageField()
+    file = models.ImageField(upload_to="room_photos")
     room = models.ForeignKey(Room, related_name="photos", on_delete=models.CASCADE)
 
     def __str__(self):

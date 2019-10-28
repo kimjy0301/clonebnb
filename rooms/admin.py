@@ -1,12 +1,19 @@
 from django.contrib import admin
+from django.utils.html import mark_safe
 from . import models
 
 # Register your models here.
 
 
+class PhotoInline(admin.TabularInline):
+    model = models.Photo
+
+
 @admin.register(models.Room)
 class RoomAdmin(admin.ModelAdmin):
     """항목 Admin"""
+
+    inlines = [PhotoInline]
 
     # 방 세부화면에서 보여질 필드셋 정의
     fieldsets = (
@@ -39,6 +46,7 @@ class RoomAdmin(admin.ModelAdmin):
         "instant_book",
         "count_amenities",
         "count_photos",
+        "total_rating",
     )
 
     # 방 목록에서 오른쪽에 필터 리스트 정의
@@ -51,6 +59,8 @@ class RoomAdmin(admin.ModelAdmin):
         "city",
         "country",
     )
+
+    raw_id_fields = ("host",)
 
     # 방 목록에서 검색바 추가. = 일치하는것 ^시작하는것
     search_fields = ("=city", "^host__username")
@@ -81,4 +91,9 @@ class ItemAdmin(admin.ModelAdmin):
 class PhotoAdmin(admin.ModelAdmin):
     """사진 Admin"""
 
-    pass
+    list_display = ("__str__", "get_thumbnail")
+
+    def get_thumbnail(self, obj):
+        return mark_safe(f'<img width="50px" src="{obj.file.url}" />')
+
+    get_thumbnail.short_description = "Thumbnail"

@@ -90,7 +90,7 @@ class Room(core_models.AbstractTimeStampModel):
             all_ratings += review.rating_average()
 
         if all_reviews.count() > 0:
-            return all_ratings / all_reviews.count()
+            return round(all_ratings / all_reviews.count(), 2)
         else:
             return 0
 

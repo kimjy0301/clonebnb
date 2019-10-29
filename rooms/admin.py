@@ -77,6 +77,9 @@ class RoomAdmin(admin.ModelAdmin):
     def count_photos(self, obj):  # obj는 model
         return obj.photos.count()
 
+    count_photos.short_description = "number of photos"
+    count_amenities.short_description = "number of amenities"
+
 
 @admin.register(models.RoomType, models.Facility, models.Amenity, models.HouseRule)
 class ItemAdmin(admin.ModelAdmin):

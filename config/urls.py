@@ -18,9 +18,11 @@ from django.urls import path, include
 from django.conf import settings  # from . import settings 는 안됨
 from django.conf.urls.static import static
 from core import urls as core_urls
+from rooms import urls as room_urls
 
 urlpatterns = [
-    path("", include(core_urls, namespace="core"), name="home"),
+    path("", include(core_urls, namespace="core")),
+    path("rooms/", include(room_urls, namespace="rooms")),
     path("admin/", admin.site.urls),
 ]
 

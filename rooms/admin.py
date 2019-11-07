@@ -13,6 +13,16 @@ class PhotoInline(admin.TabularInline):
 class RoomAdmin(admin.ModelAdmin):
     """항목 Admin"""
 
+    actions = ["change_country"]
+
+    def change_country(self, request, queryset):
+        updated_count = queryset.update(country="KR")  # queryset.update
+        self.message_user(
+            request, "{}건의 나라를 대한민국으로 변경".format(updated_count)
+        )  # django message framework 활용
+
+    change_country.short_description = "지정 포스팅을 대한민국으로 변경"
+
     inlines = [PhotoInline]
 
     # 방 세부화면에서 보여질 필드셋 정의

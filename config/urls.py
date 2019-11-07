@@ -19,11 +19,13 @@ from django.conf import settings  # from . import settings 는 안됨
 from django.conf.urls.static import static
 from core import urls as core_urls
 from rooms import urls as room_urls
+from users import urls as user_urls
 
 urlpatterns = [
     path("", include(core_urls, namespace="core")),
     path("rooms/", include(room_urls, namespace="rooms")),
     path("admin/", admin.site.urls),
+    path("users/", include(user_urls, namespace="users")),
 ]
 
 

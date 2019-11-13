@@ -23,8 +23,8 @@ from users import urls as user_urls
 
 urlpatterns = [
     path("", include(core_urls, namespace="core")),
-    path("rooms/", include(room_urls, namespace="rooms")),
     path("admin/", admin.site.urls),
+    path("rooms/", include(room_urls, namespace="rooms")),
     path("users/", include(user_urls, namespace="users")),
 ]
 

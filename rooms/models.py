@@ -85,7 +85,7 @@ class Room(core_models.AbstractTimeStampModel):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("rooms:detail", kwargs={"room_id": self.pk})
+        return reverse("rooms:detail", kwargs={"pk": self.pk})
 
     def total_rating(self):
         all_reviews = self.reviews.all()

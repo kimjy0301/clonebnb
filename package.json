@@ -1,0 +1,22 @@
+{
+  "name": "clonebnb",
+  "version": "1.0.0",
+  "description": "Airbnb Clone Coding",
+  "scripts": {
+    "css": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimjy0301/clonebnb.git"
+  },
+  "homepage": "https://github.com/kimjy0301/clonebnb#readme",
+  "devDependencies": {
+    "autoprefixer": "^9.7.3",
+    "gulp": "^4.0.2",
+    "gulp-csso": "^4.0.1",
+    "gulp-postcss": "^8.0.0",
+    "gulp-sass": "^4.0.2",
+    "node-sass": "^4.13.0",
+    "tailwindcss": "^1.1.4"
+  }
+}

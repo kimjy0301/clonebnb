@@ -136,3 +136,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
 
 # MEDIA_ROOT에 URL로 접근하기 위한 설정 media/ 로하면 상대경로 , /media/로 하면 절대경로
 MEDIA_URL = "/media/"
+
+
+# Email 설정
+EMAIL_HOST = "smtp.mailgun.org"
+EMAIL_PORT = "587"
+EMAIL_HOST_USER = os.environ.get("MAILGUN_USERNAME")
+EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_PASSWORD")
+EMAIL_FROM = "kimjy0301@sandbox658887d3c58a43a9902bf426f0208cac.mailgun.org"

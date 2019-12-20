@@ -33,7 +33,7 @@ class SignUpForm(forms.ModelForm):
         model = user_models.User
         fields = ("first_name", "last_name", "email", "birthdate")
         widgets = {
-            "birthdate": forms.DateInput(
+            "birthdate": forms.DateTimeInput(
                 format=("%m/%d/%Y"),
                 attrs={
                     "class": "form-control",

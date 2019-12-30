@@ -98,6 +98,15 @@ class Room(core_models.AbstractTimeStampModel):
         else:
             return 0
 
+    def first_photo(self):
+
+        # photo1,photo2,photo3, = self.photos.all()[:3] 이런식으로 해주면 array 언패킹해서 데이터 할당됨. 파이썬의 기능
+        photo, = self.photos.all()[:1]
+        if photo is None:
+            photo = "/static/img/noimage.svg"
+
+        return photo.file.url
+
 
 class Photo(core_models.AbstractTimeStampModel):
     """방 사진"""

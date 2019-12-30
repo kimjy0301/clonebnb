@@ -18,6 +18,7 @@ class LoginForm(forms.Form):
 
         email = self.cleaned_data.get("email")
         password = self.cleaned_data.get("password")
+
         try:
             user = user_models.User.objects.get(username=email)
             if user.check_password(password):

@@ -49,7 +49,7 @@ PROJECT_APPS = [
     "conversations.apps.ConversationsConfig",
 ]
 
-THIRD_PARTY_APPS = ["django_countries", "django_seed"]
+THIRD_PARTY_APPS = ["django_countries", "django_seed", "debug_toolbar"]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 
@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -125,7 +126,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+# 웹상에서 접속할때 입력해야하는 값
 STATIC_URL = "/static/"
+
+# static url로 접속시 파일을 찿는 경로
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -144,3 +149,7 @@ EMAIL_PORT = "587"
 EMAIL_HOST_USER = os.environ.get("MAILGUN_USERNAME")
 EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_PASSWORD")
 EMAIL_FROM = "kimjy0301@sandbox658887d3c58a43a9902bf426f0208cac.mailgun.org"
+
+
+INTERNAL_IPS = ("127.0.0.1",)
+

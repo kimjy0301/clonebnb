@@ -1,10 +1,11 @@
 import os
 import requests
-from django.views.generic import FormView
+from django.views.generic import FormView, DetailView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
+from django.contrib import messages
 
 from . import forms
 from users import models as user_models
@@ -36,14 +37,18 @@ class LoginView(FormView):
     def form_valid(self, form):
         email = form.cleaned_data.get("email")
         password = form.cleaned_data.get("password")
+
+        print(email)
         user = authenticate(self.request, username=email, password=password)
         if user is not None:
             login(self.request, user)
+            messages.success(self.request, f"환영합니다. {user.first_name}")
         return super().form_valid(form)
 
 
 def log_out(request):
     logout(request)
+    messages.success(request, "정상적으로 Logout 되었습니다.")
     return redirect(reverse("core:home"))
 
 
@@ -51,12 +56,6 @@ class SignUpView(FormView):
     template_name = "users/signup.html"
     form_class = forms.SignUpForm
     success_url = reverse_lazy("core:home")
-
-    initial = {
-        "first_name": "kim",
-        "last_name": "jiyong",
-        "email": "znzld505@naver.com",
-    }
 
     def form_valid(self, form):
 
@@ -116,7 +115,7 @@ def github_callback(request):
             result_json = token_request.json()
             error = result_json.get("error", None)
             if error is not None:
-                raise GithubException()
+                raise GithubException("Github RestApi 호출 실패.")
             else:
                 access_token = result_json.get("access_token")
 
@@ -138,7 +137,9 @@ def github_callback(request):
                         if user.login_method == user_models.User.LOGIN_GITHUB:
                             login(request, user)
                         else:
-                            raise GithubException()
+                            raise GithubException(
+                                f"{user.login_method.upper() } 방식을 사용하여 로그인해주세요."
+                            )
                     except user_models.User.DoesNotExist:
                         new_user = user_models.User.objects.create(
                             username=email,
@@ -151,10 +152,12 @@ def github_callback(request):
                         new_user.login_method = user_models.User.LOGIN_GITHUB
                         new_user.save()
                         login(request, new_user)
+                        messages.success(request, f"환영합니다. {user.first_name}")
                     return redirect(reverse("core:home"))
                 else:
-                    raise GithubException()
-    except GithubException:
+                    raise GithubException("사용자 이름 불러오기 실패.")
+    except GithubException as e:
+        messages.error(request, e)
         return redirect(reverse("users:login"))
 
 
@@ -167,7 +170,7 @@ def kakao_login(request):
 
 
 class KakaoExcepction(Exception):
-    print(Exception)
+    pass
 
 
 def kakao_callback(request):
@@ -188,7 +191,7 @@ def kakao_callback(request):
         token_json = token_request.json()
         error = token_json.get("error", None)
         if error is not None:
-            raise KakaoExcepction()
+            raise KakaoExcepction("카카오 인증코드 수신 실패.")
         access_token = token_json.get("access_token", None)
 
         profile_request = requests.get(
@@ -199,10 +202,10 @@ def kakao_callback(request):
 
         kakao_account = profile_json.get("kakao_account")
         if kakao_account is None:
-            raise KakaoExcepction()
+            raise KakaoExcepction("카카오 계정 불러오기 실패.")
         email = kakao_account.get("email")
         if email is None:
-            raise KakaoExcepction()
+            raise KakaoExcepction("카카오 계정에 이메일 접근 권한을 확인해주세요.")
 
         properties = profile_json.get("properties")
         nickname = properties.get("nickname")
@@ -211,7 +214,7 @@ def kakao_callback(request):
             user = user_models.User.objects.get(email=email)
 
             if user.login_method != user_models.User.LOGIN_KAKAO:
-                raise KakaoExcepction()
+                raise KakaoExcepction(f"{user.login_method.upper() } 방식을 사용하여 로그인해주세요.")
         except user_models.User.DoesNotExist:
 
             user = user_models.User.objects.create(
@@ -229,7 +232,19 @@ def kakao_callback(request):
                     f"{nickname}-avatart", ContentFile(photo_request.content)
                 )
         login(request, user)
+        messages.success(request, f"환영합니다. {user.first_name}")
 
         return redirect(reverse("core:home"))
-    except KakaoExcepction:
+    except KakaoExcepction as e:
+        messages.error(request, e)
         return redirect(reverse("users:login"))
+
+
+class UserProfileView(DetailView):
+    model = user_models.User
+    context_object_name = "user_obj"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["hello"] = "hello!"
+        return context

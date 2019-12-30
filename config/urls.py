@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings  # from . import settings 는 안됨
 from django.conf.urls.static import static
+from django.conf.urls import url
 from core import urls as core_urls
 from rooms import urls as room_urls
 from users import urls as user_urls
@@ -32,4 +33,7 @@ urlpatterns = [
 # 개발/운영 모드 체크
 
 if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns = [url(r"^__debug__/", include(debug_toolbar.urls))] + urlpatterns
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

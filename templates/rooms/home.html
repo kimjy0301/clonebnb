@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block page_title %}
     home
@@ -6,29 +7,41 @@
 
 {% block content %}
 
-{% for room in rooms %}
+<div class="container mx-auto">
+    <div class="bg-gray-800 -mx-40 h-50vh mt-32 mb-20 rounded-2xl bg-cover bg-center" style="background-image:url({% static 'img/basketball2.jpg' %})" >
+    </div>
 
-<h3>
-   <a href="{% url 'rooms:detail' room.pk %}" >  {{ room.name }} / ${{ room.price }}</a>
-</h3>
 
-{% endfor %}
+    <div class="flex flex-wrap -mx-40 mb-10">
+        {% for room in rooms %}
+            {% include 'mixins/room_card.html' with room=room %}
+        {% endfor %}
+    </div>
 
-{% for page in page_obj.paginator.page_range %}
-    <a href="?page={{ page }}">{{ page }}</a>
-{% endfor %}
 
-<h5>
-    {% if page_obj.has_previous %}
-    <a href="?page={{page_obj.previous_page_number}}">Previous</a>
-    {% endif %}
+    <div class="flex items-center justify-center pb-10">
+        {% if page_obj.has_previous %}
+            <a href="?page={{page_obj.previous_page_number}}">
+                <i class="fas fa-arrow-left fa-lg text-gray-500 hover:text-gray-700"></i>
+            </a>
+        {% endif %}
 
-        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    {% if page_obj.has_next %}    
-        <a href="?page={{page_obj.next_page_number}}">Next</a>
-    {% endif %}
+            {% for page in page_obj.paginator.page_range %}
+                <span class="mx-3">
+                    {% if page_obj.number == page %}
+                        <a class="text-xl font-bold text-gray-800 hover:text-black" href="?page={{ page }}">{{ page }}</a>
+                    {% else %}
+                        <a class="text-xl text-gray-700 hover:text-black " href="?page={{ page }}">{{ page }}</a>
+                    {% endif %}
+                </span>
+            {% endfor %}
 
-</h5>
-
+        {% if page_obj.has_next %}    
+            <a href="?page={{page_obj.next_page_number}}">
+                <i class="fas fa-arrow-right fa-lg text-gray-500 hover:text-gray-700"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}
 

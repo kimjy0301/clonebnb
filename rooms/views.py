@@ -15,7 +15,7 @@ from django.views.generic import ListView, View
 class HomeView(ListView):
     model = room_models.Room
     template_name = "rooms/home.html"
-    paginate_by = 10
+    paginate_by = 12
     paginate_orphans = 5
     ordering = "created"
     context_object_name = "rooms"

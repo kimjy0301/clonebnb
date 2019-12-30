@@ -13,7 +13,7 @@ class PhotoInline(admin.TabularInline):
 class RoomAdmin(admin.ModelAdmin):
     """항목 Admin"""
 
-    actions = ["change_country"]
+    actions = ["change_country", "change_host"]
 
     def change_country(self, request, queryset):
         updated_count = queryset.update(country="KR")  # queryset.update
@@ -22,6 +22,14 @@ class RoomAdmin(admin.ModelAdmin):
         )  # django message framework 활용
 
     change_country.short_description = "지정 포스팅을 대한민국으로 변경"
+
+    def change_host(self, request, queryset):
+        updated_count = queryset.update(host=234)  # queryset.update
+        self.message_user(
+            request, "{}건의 소유자를 234로 변경".format(updated_count)
+        )  # django message framework 활용
+
+    change_host.short_description = "지정 소유자를 김지용으로 변경"
 
     inlines = [PhotoInline]
 

@@ -7,6 +7,7 @@ from django.http import Http404
 
 from django_countries import countries
 from django.views.generic import ListView, View
+import math
 
 
 # Create your views here.
@@ -23,8 +24,26 @@ class HomeView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        now = timezone.now()
-        context["now"] = now
+        totalPage = context["page_obj"].paginator.num_pages
+
+        page = self.request.GET.get("page", 1)
+        context["page"] = page
+
+        countPage = 5
+
+        startPage = int(
+            math.floor(((int(page) - 1) / int(countPage))) * int(countPage) + 1
+        )
+        endPage = startPage + countPage
+
+        if endPage > int(totalPage):
+            context["pageRange"] = range(startPage, totalPage + 1)
+            context["page_obj"].has_next = False
+        else:
+            context["pageRange"] = range(startPage, endPage)
+
+        if startPage == 1:
+            context["page_obj"].has_previous = False
 
         return context
 

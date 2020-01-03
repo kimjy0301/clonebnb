@@ -101,11 +101,21 @@ class Room(core_models.AbstractTimeStampModel):
     def first_photo(self):
 
         # photo1,photo2,photo3, = self.photos.all()[:3] 이런식으로 해주면 array 언패킹해서 데이터 할당됨. 파이썬의 기능
-        photo, = self.photos.all()[:1]
-        if photo is None:
-            photo = "/static/img/noimage.svg"
 
-        return photo.file.url
+        photos = self.photos.all()
+
+        if photos.count() > 0:
+            photo, = photos[:1]
+            return photo.file.url
+        else:
+            photo = "/static/img/noimage.svg"
+            return photo
+
+    def get_next_four_photos(self):
+        photos = self.photos.all()
+        if photos.count() > 0:
+            photos = photos[1:5]
+            return photos
 
 
 class Photo(core_models.AbstractTimeStampModel):

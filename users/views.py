@@ -1,13 +1,16 @@
 import os
 import requests
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView, DetailView, UpdateView
+from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
 from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.contrib.messages.views import SuccessMessageMixin
 
-from . import forms
+from . import forms, mixins
 from users import models as user_models
 
 
@@ -29,10 +32,9 @@ from users import models as user_models
 #         return render(request, "users/login.html", {"form": form})
 
 
-class LoginView(FormView):
+class LoginView(mixins.LoggedOutOnlyView, FormView):
     template_name = "users/login.html"
     form_class = forms.LoginForm
-    success_url = reverse_lazy("core:home")
 
     def form_valid(self, form):
         email = form.cleaned_data.get("email")
@@ -45,6 +47,13 @@ class LoginView(FormView):
             messages.success(self.request, f"환영합니다. {user.first_name}")
         return super().form_valid(form)
 
+    def get_success_url(self):
+        nextPage = self.request.GET.get("next")
+        if nextPage is not None:
+            return nextPage
+        else:
+            return reverse_lazy("core:home")
+
 
 def log_out(request):
     logout(request)
@@ -52,7 +61,7 @@ def log_out(request):
     return redirect(reverse("core:home"))
 
 
-class SignUpView(FormView):
+class SignUpView(mixins.LoggedOutOnlyView, FormView):
     template_name = "users/signup.html"
     form_class = forms.SignUpForm
     success_url = reverse_lazy("core:home")
@@ -76,10 +85,9 @@ def complete_verification(request, key):
         user = user_models.User.objects.get(email_secret=key)
         user.email_verified = True
         user.save()
-        # 성공메시지 추가 해줘야함
+        messages.success(request, f"이메일 인증 성공.")
     except user_models.User.DoesNotExist:
-        # 나중에 에러메시지 추가해줘야됨
-        pass
+        messages.error(request, f"유저가 존재하지 않습니다.")
     return redirect(reverse("core:home"))
 
 
@@ -240,7 +248,7 @@ def kakao_callback(request):
         return redirect(reverse("users:login"))
 
 
-class UserProfileView(DetailView):
+class UserProfileView(mixins.LoggedInOnlyView, DetailView):
     model = user_models.User
     context_object_name = "user_obj"
 
@@ -248,3 +256,54 @@ class UserProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         context["hello"] = "hello!"
         return context
+
+
+class UpdateProfileView(mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
+    model = user_models.User
+    template_name = "users/update-profile.html"
+    success_message = "Profile 업데이트 성공"
+    fields = [
+        "first_name",
+        "last_name",
+        "gender",
+        "bio",
+        "birthdate",
+        "language",
+        "currency",
+    ]
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    # Label 을 사용하지 않을경우 widget을 사용하여 placeholder를 지정해주어야함
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        print(form.fields)
+        form.fields["first_name"].widget.attrs = {"placeholder": "성"}
+        form.fields["last_name"].widget.attrs = {"placeholder": "이름"}
+        form.fields["birthdate"].widget.attrs = {"placeholder": "생일"}
+        form.fields["gender"].widget.attrs = {"placeholder": "성별"}
+        form.fields["bio"].widget.attrs = {"placeholder": "태그"}
+        return form
+
+
+class UpdatePasswordView(
+    mixins.EmailLoggedInOnlyView, mixins.LoggedInOnlyView, PasswordChangeView
+):
+
+    template_name = "users/change-password.html"
+    # success_url = reverse_lazy("users:update")
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["old_password"].widget.attrs = {"placeholder": "기존 비밀번호"}
+        form.fields["new_password1"].widget.attrs = {"placeholder": "새로운 비밀번호"}
+        form.fields["new_password2"].widget.attrs = {"placeholder": "비밀번호 확인"}
+        return form
+
+    def form_valid(self, form):
+        messages.success(self.request, f"비밀번호가 변경되었습니다.")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.request.user.get_absolute_url()

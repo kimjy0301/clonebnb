@@ -9,16 +9,14 @@ Login
 {% block content %}
 
 <div class="container mx-auto flex justify-center flex-col items-center border border-gray-400 p-3 lg:w-5/12 md:w-1/2 xl:w-1/3">
-
     {% include "partials/social_login.html" %}
-    <form class="w-full" method="POST" action="{% url 'users:login' %}">
+    <form class="w-full" method="POST" >
         {% csrf_token %}
         {% if form.non_field_errors %}
             {% for error in form.non_field_errors %}
                 {{error|escape}}
             {% endfor%}
         {% endif %}
-
         <div class="input {% if form.email.errors %}has_error{% endif %} ">  
             <div class="flex w-full py-5 rounded-sm py-2 font-bold text-xl mb-2 border border-gray-600 px-5 justify-between items-center">
                 <input value="{% if form.email.value %}{{form.email.value}}{% endif %}" id="emailInput" name="email" type="email" placeholder="Email" class="text-left w-5/6 focus:outline-none text-xl">                    
@@ -31,8 +29,6 @@ Login
                 {% endfor %}
             {% endif %}
         </div>
-
-
         <div class="input {% if form.password.errors %}has_error{% endif %} ">  
             <div class="flex w-full rounded-sm py-5 font-bold text-xl mb-2 border border-gray-600 px-5 justify-between items-center">
                 <input id="passwordInput" name="password" type="password" placeholder="Password" class="ext-left w-5/6 focus:outline-none text-xl"></input>
@@ -44,9 +40,6 @@ Login
                 {% endfor %}
             {% endif %}
         </div>
-        
-
-
         <button class="btn border-red-700 border-2 text-white bg-red-500 hover:text-gray-200">Login</button>
     </form>
 

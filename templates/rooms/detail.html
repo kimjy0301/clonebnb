@@ -6,30 +6,16 @@
 {% endblock page_title %}
 
 {% block content %}
-<div>
-   <h1> {{ room.name }} </h1>
-   <h3>{{ room.description }}</h3>
-</div>
-    <h2>By: {{ room.host.username }} {% if room.host.superhost %}
-        (superhost)
-    {% else %}
-    {% endif %}</h2>
-    <h3>Amenities<h3>
-    <ul>
-    {% for a in room.amenities.all %}
-       <li> {{a}}</li>
-    {% endfor %}
-    </ul>
-    <h3>Facilities<h3>
-    <ul>
-    {% for f in room.facilities.all %}
-       <li> {{f}}</li>
-    {% endfor %}
-    </ul>
-    <h3>House Rules<h3>
-    <ul>
-    {% for r in room.room_rules.all %}
-       <li> {{r}}</li>
-    {% endfor %}
-    </ul>
-{% endblock content %}
+
+   <div class=" overflow-hidden -mt-4 container max-w-full h-75vh mb-20 flex">
+      <div class="h-full w-1/2 bg-cover border border-gray-500 room-photo hover:shadow-lg" style="background-image: url({{room.first_photo}});">
+      </div>
+      <div class="h-full w-1/2 flex flex-wrap">
+            {% for photo in room.get_next_four_photos %}
+               <div class="w-1/2 h-auto bg-cover bg-center border border-gray-500 room-photo hover:shadow-lg" style="background-image: url({{photo.file.url}});"></div>
+            {% endfor %}
+      </div>
+   
+
+   </div>
+{% endblock content %}                      dz

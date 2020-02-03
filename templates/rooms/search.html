@@ -1,57 +1,115 @@
 {% extends "base.html" %}
 {% load static %}
 {% load room_tag %}
+{% load widget_tweaks %}
 
 {% block page_title %}
     Search
 {% endblock page_title %}
 
 {% block content %}
-
-    <h2>Search!</h2>
-    <h4>search by {{ city }} </h4>
-
-    <form method="get" action="{% url 'rooms:search'  %}">
-        {{form.as_ul}}
-        <button>Search</button>
-    </form>
-<h1>Results</h1>
 {% csrf_token %}
-{% for room in page.object_list %}
-   <a href="{% url 'rooms:detail' room.pk %}" > 
-    <h3> {{ room.city }} </h3>
-    <h4>{{ room.description }}</h4>   
-   </a>
-{% endfor %}
 
-{% for page in page.paginator.page_range %}
 
-    {% if 'page=' in request.GET.urlencode %}
-        <a href="?{{ request.GET.urlencode|change_page:page }}">{{ page }}</a>   
-    {% else %}
-        <a href="?{{ request.GET.urlencode }}&page={{ page }}">{{ page }}</a>
+<div class="container mx-auto border mb-10 pb-5">
+    <form  method="get" action="{% url 'rooms:search'  %}">
+        <div class="flex justify-around p-5">
+            <div class="flex flex-col">
+                {{form.country.label}}
+                {{form.country|add_class:"search-input"}}
+
+                {{form.city.label}}
+                {{form.city|add_class:"search-input"}}
+                {{form.room_type.label}}
+                {{form.room_type|add_class:"search-input"}}
+                {{form.price.label}}
+                {{form.price|add_class:"search-input"}}
+                    {% if price.errors %}
+                        {% for error in price.errors %}
+                            <span class="text-red-700 font-medium text-sm">{{error}}</span> 
+                        {% endfor %}
+                    {% endif %}
+                {{form.guests.label}}
+                {{form.guests|add_class:"search-input"}}
+                {{form.bedrooms.label}}
+                {{form.bedrooms|add_class:"search-input"}}
+                {{form.beds.label}}
+                {{form.beds|add_class:"search-input"}}
+                {{form.baths.label}}
+                {{form.baths|add_class:"search-input"}}
+
+                <div>
+                    <label for='instant_book' class="mr-2">
+                    {{form.instant_book|attr:"id:instant_book"}}
+                    Instant book
+                    </label>
+                </div>
+            </div>
+            <div >
+                {{form.amenities.label}}
+                <div class="h-75vh overflow-y-scroll border border-gray-600 hover:border-teal-500 focus:outline-none mt-1">
+                {{form.amenities}}
+
+                </div>                
+            </div>
+            <div>
+                {{form.facilities.label}}
+                <div class="h-75vh border border-gray-600 hover:border-teal-500 focus:outline-none mt-1">
+                {{form.facilities}}                  
+                </div>
+            </div>
+
+
+        </div>
+        <div class="flex justify-center mt-2">
+            <button  class="w-3/5 py-3 rounded-lg font-bold text-xl mb-2 text-center bg-red-500 text-white mx-auto">검색</button>
+        </div>
+        
+    </form>
+</div>
+
+
+    {% if roomCount %}
+        <div class="container mx-auto">
+            <div class="containter mx-auto mb-10">
+                <h4 class="font-bold text-lg text-center">
+                총 {{roomCount}} 개의 방이 검색되었습니다.
+                </h4>
+            </div>
+            <div class="flex flex-wrap -mx-40 mb-10">
+                {% for room in page_obj.object_list %}
+                        {% include 'mixins/room_card.html' with room=room %}
+                {% endfor %}
+            </div>
+            <div class="flex items-center justify-center pb-10">
+                {% if page_obj.has_previous %}
+                    {% if 'page=' in request.GET.urlencode %}
+                        <a href="?{{ request.GET.urlencode|previous_page}}"> 
+                    {% else %}
+                        <a href="?{{ request.GET.urlencode}}&page={{page}}">
+                    {% endif %}
+                        <i class="fas fa-arrow-left fa-lg text-gray-500 hover:text-gray-700"></i>
+                        </a>    
+                {% endif %}
+                {% for page in pageRange %}
+                    <span class="mx-3">
+                        {% if page_obj.number == page %}
+                            <a class="text-xl font-bold text-gray-800 hover:text-black">{{ page }}</a>
+                        {% else %}
+                            <a class="text-xl text-gray-700 hover:text-black " href="?{{ request.GET.urlencode|change_page:page}}">{{ page }}</a>
+                        {% endif %}
+                    </span>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    {% if page|add:'5' > page_obj.paginator.num_pages  %}
+                        <a href="?{{ request.GET.urlencode|change_page:page_obj.paginator.num_pages}}">
+                    {% else %}
+                        <a href="?{{ request.GET.urlencode|next_page}}">
+                    {% endif %}
+                            <i class="fas fa-arrow-right fa-lg text-gray-500 hover:text-gray-700"></i>
+                        </a>
+                {% endif %}
+            </div>
+        </div>
     {% endif %}
-      
-{% endfor %}
-
-<h5>
-    {% if page.has_previous %}
-        {% if 'page=' in request.GET.urlencode %}
-            <a href="?{{ request.GET.urlencode|previous_page }}">Previous</a>   
-        {% else %}
-            <a href="?{{ request.GET.urlencode}}&page={{page.previous_page_number}}">Previous</a>
-        {% endif %}
-
-    {% endif %}
-        Page {{ page.number }} of {{ page.paginator.num_pages }}
-    {% if page.has_next %}  
-        {% if 'page=' in request.GET.urlencode %}
-            <a href="?{{ request.GET.urlencode|next_page }}">Next</a>
-        {% else %}
-            <a href="?{{ request.GET.urlencode}}&page={{page.next_page_number}}">Next</a>
-        {% endif %}
-    {% endif %}
-</h5>
-
-
 {% endblock content %}

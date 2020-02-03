@@ -15,6 +15,7 @@ django-seed = "*"
 django-dotenv = "*"
 requests = "*"
 django-debug-toolbar = "*"
+django-widget-tweaks = "*"
 
 [requires]
 python_version = "3.7"

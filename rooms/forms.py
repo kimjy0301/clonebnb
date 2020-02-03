@@ -30,3 +30,106 @@ class SearchForm(forms.Form):
         required=False,
     )
 
+
+class CreatePhotoForm(forms.ModelForm):
+    class Meta:
+        model = room_models.Photo
+        fields = ("caption", "file")
+
+    def save(self, pk, *args, **kwargs):
+        photo = super().save(commit=False)
+        room = room_models.Room.objects.get(pk=pk)
+        photo.room = room
+        photo.save()
+
+
+class HostingRoomForm(forms.ModelForm):
+    class Meta:
+        model = room_models.Room
+        fields = {
+            "name",
+            "description",
+            "country",
+            "city",
+            "price",
+            "address",
+            "guests",
+            "beds",
+            "bedrooms",
+            "baths",
+            "check_in",
+            "check_out",
+            "instant_book",
+            "room_type",
+            "amenities",
+            "facilities",
+            "room_rules",
+        }
+
+    field_order = [
+        "name",
+        "description",
+        "country",
+        "city",
+        "price",
+        "address",
+        "guests",
+        "beds",
+        "bedrooms",
+        "baths",
+        "check_in",
+        "check_out",
+        "instant_book",
+        "room_type",
+        "amenities",
+        "facilities",
+        "room_rules",
+    ]
+
+    def save(self, *args, **kwargs):
+        room = super().save(commit=False)
+        return room
+
+
+class EditRoomForm(forms.ModelForm):
+    class Meta:
+        model = room_models.Room
+        fields = {
+            "name",
+            "description",
+            "country",
+            "city",
+            "price",
+            "address",
+            "guests",
+            "beds",
+            "bedrooms",
+            "baths",
+            "check_in",
+            "check_out",
+            "instant_book",
+            "room_type",
+            "amenities",
+            "facilities",
+            "room_rules",
+        }
+
+    field_order = [
+        "name",
+        "description",
+        "country",
+        "city",
+        "price",
+        "address",
+        "guests",
+        "beds",
+        "bedrooms",
+        "baths",
+        "check_in",
+        "check_out",
+        "instant_book",
+        "room_type",
+        "amenities",
+        "facilities",
+        "room_rules",
+    ]

@@ -7,12 +7,19 @@ from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.decorators import login_required
 
+
+# 번역을 위한 임포트
+from django.utils.translation import gettext_lazy as _
+
+
+import shutil
 from . import forms, mixins
 from users import models as user_models
-
+from django.utils import translation
 
 # class LoginView(View):
 #     def get(self, request):
@@ -40,7 +47,6 @@ class LoginView(mixins.LoggedOutOnlyView, FormView):
         email = form.cleaned_data.get("email")
         password = form.cleaned_data.get("password")
 
-        print(email)
         user = authenticate(self.request, username=email, password=password)
         if user is not None:
             login(self.request, user)
@@ -185,7 +191,7 @@ def kakao_callback(request):
     try:
         app_key = os.environ.get("KAKAO_ID")
         code = request.GET.get("code")
-        redirect_uri = "http://127.0.0.1:8000/users/login/kakao/callback"
+        redirect_uri = os.environ.get("KAKAO_REDIRECT_URL")
         post_data = {
             "grant_type": "authorization_code",
             "client_id": app_key,
@@ -252,9 +258,15 @@ class UserProfileView(mixins.LoggedInOnlyView, DetailView):
     model = user_models.User
     context_object_name = "user_obj"
 
+    total, used, free = shutil.disk_usage("/")
+    print("Total: %d GiB" % (total // (2 ** 30)))
+    print("Used: %d GiB" % (used // (2 ** 30)))
+    print("Free: %d GiB" % (free // (2 ** 30)))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["hello"] = "hello!"
+        rooms = self.object.rooms.all()[0:10]
+        context["rooms"] = rooms
         return context
 
 
@@ -307,3 +319,19 @@ class UpdatePasswordView(
 
     def get_success_url(self):
         return self.request.user.get_absolute_url()
+
+
+@login_required
+def switch_hosting(request):
+    try:
+        del request.session["is_hosting"]
+    except KeyError:
+        request.session["is_hosting"] = True
+    return redirect(reverse("core:home"))
+
+
+def switch_language(request):
+    lang = request.GET.get("lang", None)
+    if lang is not None:
+        request.session[translation.LANGUAGE_SESSION_KEY] = lang
+    return HttpResponse(status=200)

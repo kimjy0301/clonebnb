@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% load room_tag %}
+
+{% block page_title %}
+    {{user.first_name}}'s Favorite Rooms
+{% endblock page_title %}
+
+{% block content %}
+
+
+{% if user.rooms.count > 0 %}
+    <div class="mt-10 pb-10 flex flex-col items-center mx-auto container">
+        <h3 class="mb-12 text-xl">{{user.first_name}} {{user.last_name}}'s Favorite Rooms</h3> 
+        <div class="flex flex-wrap w-full">
+                {% for room in user.list.rooms.all %}
+                    {% include 'mixins/room_card.html' with room=room %}
+                {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <div class="h-75vh"></div>
+{% endif %}
+
+
+{% endblock content %}
+
+ 
+

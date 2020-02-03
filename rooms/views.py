@@ -1,13 +1,21 @@
 from django.shortcuts import render, redirect
-from . import models as room_models, forms
 from django.core.paginator import Paginator, EmptyPage
+
 from django.utils import timezone
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import Http404
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.decorators import login_required
 
 from django_countries import countries
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, UpdateView, DetailView, FormView
+
 import math
+
+from . import mixins as room_mixins
+from . import models as room_models, forms
+from users import mixins as user_mixins
 
 
 # Create your views here.
@@ -25,7 +33,6 @@ class HomeView(ListView):
         context = super().get_context_data(**kwargs)
 
         totalPage = context["page_obj"].paginator.num_pages
-
         page = self.request.GET.get("page", 1)
         context["page"] = page
 
@@ -50,10 +57,19 @@ class HomeView(ListView):
 
 class SearchView(ListView):
     def get(self, request):
-        country = request.GET.get("country")
-
-        if country:
+        city = request.GET.get("city")
+        if city:
             form = forms.SearchForm(request.GET)
+            form.fields["country"].initial = "KR"
+
+            country = request.GET.get("country")
+            if country is None:
+                qDict = form.data
+                _mutable = qDict._mutable
+                qDict._mutable = True
+                qDict["country"] = "KR"
+                qDict._mutable = _mutable
+
             if form.is_valid():
                 city = form.cleaned_data.get("city")
                 country = form.cleaned_data.get("country")
@@ -101,17 +117,74 @@ class SearchView(ListView):
                 for facility in facilities:
                     qs = qs & room_models.Room.objects.filter(facilities=facility)
 
-                paginator = Paginator(qs, 10, orphans=10)
+                paginator = Paginator(qs, 8, orphans=0)
                 page = request.GET.get("page", 1)
-                rooms = paginator.get_page(page)
+
+                page_obj = paginator.get_page(page)
+
+                totalPage = paginator.num_pages
+                countPage = 5
+
+                startPage = int(
+                    math.floor(((int(page) - 1) / int(countPage))) * int(countPage) + 1
+                )
+                endPage = startPage + countPage
+
+                if endPage > int(totalPage):
+                    pageRange = range(startPage, totalPage + 1)
+                    page_obj.has_next = False
+                else:
+                    pageRange = range(startPage, endPage)
+
+                if startPage == 1:
+                    page_obj.has_previous = False
+
+                roomCount = qs.count
 
                 return render(
-                    request, "rooms/search.html", {"form": form, "page": rooms}
+                    request,
+                    "rooms/search.html",
+                    {
+                        "form": form,
+                        "page_obj": page_obj,
+                        "page": page,
+                        "pageRange": pageRange,
+                        "roomCount": roomCount,
+                    },
                 )
-
         else:
             form = forms.SearchForm()
-        return render(request, "rooms/search.html", {"form": form})
+            qs = room_models.Room.objects.all().order_by("created")[0:100]
+
+            paginator = Paginator(qs, 8, orphans=0)
+            page = request.GET.get("page", 1)
+            page_obj = paginator.get_page(page)
+            totalPage = paginator.num_pages
+            countPage = 5
+            startPage = int(
+                math.floor(((int(page) - 1) / int(countPage))) * int(countPage) + 1
+            )
+            endPage = startPage + countPage
+            if endPage > int(totalPage):
+                pageRange = range(startPage, totalPage + 1)
+                page_obj.has_next = False
+            else:
+                pageRange = range(startPage, endPage)
+            if startPage == 1:
+                page_obj.has_previous = False
+            roomCount = qs.count
+
+        return render(
+            request,
+            "rooms/search.html",
+            {
+                "form": form,
+                "page_obj": page_obj,
+                "page": page,
+                "pageRange": pageRange,
+                "roomCount": roomCount,
+            },
+        )
 
 
 def room_detail(request, pk):
@@ -221,23 +294,85 @@ def all_rooms(request):
     except EmptyPage:
         return redirect("/")
 
-    # page = request.GET.get("page", 1)
-    # page = int(page or 1)
-    # page_size = 10
-    # limit = page_size * page
-    # offset = limit - page_size
 
-    # all_rooms = room_models.Room.objects.all()[offset:limit]
-    # page_count = math.ceil(room_models.Room.objects.count() / page_size)
+class EditRoomView(
+    user_mixins.LoggedInOnlyView, room_mixins.OnlyHostEditView, UpdateView
+):
+    model = room_models.Room
+    form_class = forms.EditRoomForm
+    template_name = "rooms/room_edit.html"
 
-    # # print(str(all_rooms.query))
-    # return render(
-    #     request,
-    #     "rooms/home.html",
-    #     context={
-    #         "all_rooms": all_rooms,
-    #         "page": page,
-    #         "page_count": page_count,
-    #         "page_range": range(1, page_count + 1),
-    #     },
-    # )
+    def form_valid(self, form):
+        messages.success(self.request, f"방 정보가 변경되었습니다.")
+        self.object = form.save()
+        return super().form_valid(form)
+
+
+class RoomPhotosView(
+    user_mixins.LoggedInOnlyView, room_mixins.OnlyHostEditView, DetailView
+):
+
+    model = room_models.Room
+    template_name = "rooms/room_photos.html"
+
+    def get_object(self, queryset=None):
+        room = super().get_object(queryset=queryset)
+        if room.host.pk != self.request.user.pk:
+            raise Http404()
+        return room
+
+
+@login_required
+def delete_photo(request, room_pk, photo_pk):
+
+    user = request.user
+
+    try:
+        room = room_models.Room.objects.get(pk=room_pk)
+        if room.host.pk != user.pk:
+            messages.error(request, "해당 사진을 삭제할 권한이 없습니다.")
+        else:
+            room_models.Photo.objects.filter(pk=photo_pk).delete()
+            messages.success(request, "사진 삭제 완료.")
+        return redirect(reverse("rooms:photos", kwargs={"pk": room_pk}))
+    except room_models.Room.DoesNotExist:
+        return redirect(reverse("core:home"))
+
+
+class EditPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, UpdateView):
+    model = room_models.Photo
+    template_name = "rooms/photo_edit.html"
+    fields = ("caption",)
+    success_message = "사진 정보가 변경되었습니다."
+    pk_url_kwarg = "photo_pk"
+
+    def get_success_url(self):
+        room_pk = self.kwargs.get("room_pk")
+        return reverse("rooms:photos", kwargs={"pk": room_pk})
+
+
+class AddPhotoView(user_mixins.LoggedInOnlyView, FormView):
+    model = room_models.Photo
+    template_name = "rooms/photo_create.html"
+    fields = ("caption", "file")
+    form_class = forms.CreatePhotoForm
+
+    def form_valid(self, form):
+        pk = self.kwargs.get("pk")
+        form.save(pk)
+        messages.success(self.request, "사진 업로드 성공")
+        return redirect(reverse("rooms:photos", kwargs={"pk": pk}))
+
+
+class HostingRoomView(user_mixins.LoggedInOnlyView, FormView):
+    form_class = forms.HostingRoomForm
+    template_name = "rooms/room_create.html"
+
+    def form_valid(self, form):
+        room = form.save()
+        room.host = self.request.user
+        room.save()
+        form.save_m2m()
+        messages.success(self.request, "호스팅 성공. 사진을 등록해주세요.")
+        return redirect(reverse("rooms:photos", kwargs={"pk": room.pk}))
+

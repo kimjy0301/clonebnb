@@ -13,7 +13,7 @@
    
     {% include "mixins/user_avatar.html" with user=user_obj %}
     <div class="flex items-center" >
-        <span class="text-3xl mt-1">{{user_obj.first_name}}</span>            
+        <span class="text-3xl mt-1">{{user_obj.first_name}} {{user_obj.last_name}}</span>            
             {% if user_obj.superhost %}
                 <i class="fas fa-check-circle text-teal-400 ml-1"></i>
             {% else %}
@@ -25,17 +25,16 @@
     {% endif %}
 </div>
 {% if user_obj.rooms.count > 0 %}
-<div class="mt-10 pb-10 flex flex-col items-center mx-auto container">
-    <h3 class="mb-12 text-xl">{{user_obj.first_name}} {{user_obj.last_name}}'s Rooms</h3>    
-    <div class="flex flex-wrap w-full">
-        {% for room in user_obj.rooms.all %}
-            {% include 'mixins/room_card.html' with room=room %}
-        {% endfor %}
+    <div class="mt-10 pb-10 flex flex-col items-center mx-auto container">
+        <h3 class="mb-12 text-xl">{{user_obj.first_name}} {{user_obj.last_name}}'s Rooms</h3>    
+        <div class="flex flex-wrap w-full">
+            {% for room in rooms %}
+                {% include 'mixins/room_card.html' with room=room %}
+            {% endfor %}
+        </div>
     </div>
-</div>
-
 {% else %}
-<div class="h-75vh"></div>
+    <div class="h-75vh"></div>
 {% endif %}
 
 

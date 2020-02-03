@@ -21,12 +21,19 @@ from django.conf.urls import url
 from core import urls as core_urls
 from rooms import urls as room_urls
 from users import urls as user_urls
+from reservations import urls as reservations_urls
+from reviews import url as reviews_urls
+from lists import url as lists_urls
+
 
 urlpatterns = [
     path("", include(core_urls, namespace="core")),
     path("admin/", admin.site.urls),
     path("rooms/", include(room_urls, namespace="rooms")),
     path("users/", include(user_urls, namespace="users")),
+    path("reservations/", include(reservations_urls, namespace="reservations")),
+    path("reviews/", include(reviews_urls, namespace="reviews")),
+    path("lists/", include(lists_urls, namespace="lists")),
 ]
 
 
@@ -35,5 +42,4 @@ urlpatterns = [
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns = [url(r"^__debug__/", include(debug_toolbar.urls))] + urlpatterns
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

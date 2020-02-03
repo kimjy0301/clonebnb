@@ -14,7 +14,6 @@
         transition: transform 0.2s;
     }
 };
-
 .nav_link{
     @apply flex items-center ml-8 h-full border-b-2 border-transparent;
     a{
@@ -40,12 +39,30 @@
     }
 };
 
+.btn-link-edit{
+    @apply w-full py-3 rounded-lg font-bold text-xl mb-2 text-center bg-teal-500 text-white;
+    &:hover{
+        @apply shadow-md;
+    }
+};
 
-.update-profile, .change-password{
+.search-input{
+    @apply rounded-sm py-3 font-light text-lg w-full text-left border border-gray-600 px-5 mt-1 mb-1;
+    &:hover{
+        @apply border-teal-500;
+    }
+    &:focus{
+        outline: none;
+    }
+};
+
+
+
+.update-profile, .change-password, .update-room, .update-photo, .upload-photo, .hosting-room{
     input,
     textarea,
     select {
-        @apply rounded-sm py-5 font-light text-lg w-full text-left border border-gray-600 px-5;
+        @apply rounded-sm py-5 font-light text-lg w-full text-left border border-gray-600 px-5 mt-2;
         &:focus {
             @apply outline-none border-teal-500 bg-white;
         }
@@ -54,10 +71,11 @@
         resize: none;
         height: 7rem;
       }
-}
+};
+
 form {
     .input {
-      @apply mb-3;
+      @apply mb-3 ;
       &.has_error {        
         div{
             @apply bg-red-200 border-gray-400;
@@ -68,6 +86,7 @@ form {
         }
       } 
 };
+
 
 
 @keyframes messageFadeIn{
@@ -88,7 +107,7 @@ form {
         opacity: 0;
         transform: translateY(-50px);
     }
-}
+};
 
 .message{
     animation: messageFadeIn 3.5s ease-in-out forwards;
@@ -107,4 +126,33 @@ form {
     &.warning{
         @apply bg-yellow-500;
     }
-}
+};
+
+
+.border-section{
+    @apply border-b border-gray-400 pb-8 mt-8; 
+};
+
+
+ul{
+    @apply rounded-sm py-3 font-light text-left px-5 mt-1 mb-1;
+    li { 
+        label {
+            input {
+            }
+        }
+    }
+};
+
+
+.cal-grid{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 10px;
+    justify-items: center;
+};
+
+
+
+
+

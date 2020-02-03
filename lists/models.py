@@ -10,8 +10,8 @@ class List(core_models.AbstractTimeStampModel):
     """ 리스트 모델 정의 """
 
     name = models.CharField(max_length=80)
-    user = models.ForeignKey(
-        user_models.User, related_name="lists", on_delete=models.CASCADE
+    user = models.OneToOneField(
+        user_models.User, related_name="list", on_delete=models.CASCADE
     )
     rooms = models.ManyToManyField(room_models.Room, related_name="lists", blank=True)
 

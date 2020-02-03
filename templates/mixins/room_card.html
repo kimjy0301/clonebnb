@@ -1,6 +1,6 @@
-<div class="w-1/4 px-2 mb-6 overflow-hidden">
-    <a href="{% url 'rooms:detail' room.pk %}" >
-        <div class="room-photo w-full h-64 bg-cover bg-center mb-2 shadow-md rounded-lg" style="background-image: url({{ room.first_photo }});">
+<div class="w-1/4 px-2 mb-6">
+    <a href="{% url 'rooms:detail' pk=room.pk %}" >
+        <div class="room-photo w-full h-64 bg-cover bg-center mb-2 shadow-md rounded-lg border border-gray-400" style="background-image: url({{ room.first_photo }});">
         
         </div>
         <div class="flex justify-between mb-2">

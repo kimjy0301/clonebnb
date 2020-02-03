@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% load room_tag %}
+
+{% block page_title %}
+{{room.name}}'s Photos
+{% endblock page_title %}
+
+{% block content %}
+
+<div class="container mx-auto flex justify-center flex-col ">
+
+    <div class="my-10 w-full flex justify-center">
+        <div class="w-1/6">
+            <a href="{% url 'rooms:photo-add' room.pk %}" class="btn-link block">Upload Photo</a>
+        </div>
+    </div>
+
+
+   {% for photo in room.photos.all %}
+        <div class="mb-5 border border-gray-400 p-3 flex justify-between">
+            <div class="flex items-start">
+                <img src="{{photo.file.url}}" class="w-32 h-32" />
+                <span class="ml-5 text-xl">{{photo.caption}}</span>
+            </div>   
+            <div class="flex flex-col w-1/5 justify-around">
+                <a class="btn-link-edit" href="{% url 'rooms:photo-edit' room_pk=room.pk photo_pk=photo.pk %}">Edit</a>
+                <a class="btn-link " href="{% url 'rooms:photo-delete' room_pk=room.pk photo_pk=photo.pk %}"  onclick="return confirm('사진을 삭제하시겠습니까?');" >Delete</a>
+            </div> 
+        </div>
+   {% endfor %}
+
+   <div class="flex justify-center mt-5">
+       <a href="{% url 'rooms:edit' room.pk %}" class="text-teal-500 font-medium text-xl font-bold">Back to Edit Room</a>       
+   </div>
+
+
+</div>
+</div>>
+
+{% endblock content %}
+
+ 
+

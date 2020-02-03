@@ -7,3 +7,6 @@ class CustomManager(models.Manager):
             return self.get(**kwargs)
         except self.model.DoesNotExist:
             return None
+
+    def get_by_natural_key(self, username):
+        return self.get(username=username)

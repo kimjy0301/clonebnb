@@ -24,6 +24,7 @@ from users import urls as user_urls
 from reservations import urls as reservations_urls
 from reviews import url as reviews_urls
 from lists import url as lists_urls
+from conversations import url as conversation_urls
 
 
 urlpatterns = [
@@ -34,6 +35,7 @@ urlpatterns = [
     path("reservations/", include(reservations_urls, namespace="reservations")),
     path("reviews/", include(reviews_urls, namespace="reviews")),
     path("lists/", include(lists_urls, namespace="lists")),
+    path("conversations/", include(conversation_urls, namespace="conversations")),
 ]
 
 

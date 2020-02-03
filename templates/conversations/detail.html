@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block page_title %}
+Conversation
+{% endblock page_title %}
+
+{% block content %}
+
+<div class="container mx-auto flex justify-center">
+    <div class="flex flex-col border h-56 p-5 justify-center">
+            <div class="w-full flex items-center justify-center">
+                <span class="text-lg font-semibold text-gray-900 mb-3">Conversation</span>
+            </div>
+            <div class="flex ">
+                {% for participant in conversation.participants.all %}
+                    <div class="flex flex-col items-center">
+                        {% include "mixins/user_avatar.html" with user=participant%}
+                        <span class="text-gray-700 text-lg font-medium mt-3">{{participant.first_name}}</span>        
+                    </div>    
+                    {% if forloop.first %}
+                        <span class="font-medium text-3xl pt-4 mx-5">&</span>
+                    {% endif %}       
+                {% endfor %}
+            </div>
+    </div>       
+    
+    <div class="border flex-grow ml-10 p-5">
+        {% for message in conversation.messages.all %}
+            {% if message.user.pk != user.pk  %}
+                <div class="flex items-center border shadow-lg my-5 p-3 rounded">
+                    {% include "mixins/user_avatar.html" with user=message.user h_and_w='h-12 w-12'%}   
+                    <div class="border w-px h-10 mx-3 border-gray-600"></div>
+                    <div class="flex-col flex">
+                        <div class="font-mediumtext-gray-900 rounded p-2 break-words w-auto max-w-3xl">                
+                            {{message.message|linebreaks}}
+                        </div>
+                        <span class="font-light text-sm mt-1">{{message.created}}</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="flex items-center border shadow-lg my-5 p-3 rounded flex-row-reverse ">
+                    {% include "mixins/user_avatar.html" with user=message.user h_and_w='h-12 w-12'%}   
+                    <div class="border w-px h-10 mx-3 border-gray-600"></div>
+                    <div class="flex flex-col">
+                        <div class="font-medium text-gray-900 rounded p-2 break-words w-auto max-w-3xl">                
+                            {{message.message|linebreaks}}
+                        </div>                    
+                        <span class="font-light text-xs self-end mt-1">{{message.created}}</span>
+                    </div>
+                </div>                
+            {% endif %}
+        {% endfor %}
+
+        <div class="w-full h-px border-t my-10"></div>
+        
+        <div class="">
+            <form class="flex items-center" method="POST">
+                {% csrf_token %}
+                {{form.message|add_class:"w-full border h-32 p-2"}}
+                <button class="w-24 h-16 rounded bg-red-500 ml-3 text-white font-medium text-xl hover:shadow-lg focus:outline-none ">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+ 
+
